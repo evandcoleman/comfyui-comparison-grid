@@ -67,7 +67,7 @@ def pil_to_tensor(img):
 # ---------------------------------------------------------------------------
 
 def load_font(font_path, font_size):
-    """Load a TrueType font, falling back to PIL default."""
+    """Load a TrueType font, falling back through system fonts."""
     if font_path:
         for candidate in [
             font_path,
@@ -79,9 +79,26 @@ def load_font(font_path, font_size):
                     return ImageFont.truetype(candidate, font_size)
                 except Exception:
                     pass
+
+    # Try common system fonts across platforms
+    fallbacks = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+        "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
+        "/System/Library/Fonts/Helvetica.ttc",
+        "arial.ttf",
+    ]
+    for candidate in fallbacks:
+        try:
+            return ImageFont.truetype(candidate, font_size)
+        except Exception:
+            continue
+
+    # Last resort — Pillow 10+ supports sized default
     try:
-        return ImageFont.truetype("arial.ttf", font_size)
-    except Exception:
+        return ImageFont.load_default(size=font_size)
+    except TypeError:
         return ImageFont.load_default()
 
 # ---------------------------------------------------------------------------
