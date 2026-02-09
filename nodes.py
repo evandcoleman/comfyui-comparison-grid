@@ -115,6 +115,7 @@ class ComparisonGrid:
             "optional": FlexibleOptionalInputType({
                 "font_path": ("STRING", {"default": ""}),
                 "lora_name": (any_type,),
+                **{f"lora_{i}": (any_type,) for i in range(1, 12)},
             }),
         }
 
