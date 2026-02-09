@@ -171,15 +171,25 @@ class ComparisonGrid:
             if key.startswith("lora_") and kwargs[key] is not None:
                 linked_loras.append(str(kwargs[key]))
 
-        # When lora is an axis and we have linked lora inputs, use those as axis values
+        # When lora is an axis and we have linked lora inputs, use the linked
+        # filenames as values but prefer the multiline text entries as labels
+        # (e.g. "Epoch 20") since filenames from download nodes are opaque.
         if linked_loras:
             if row_axis == "lora":
-                row_items = [(derive_label(v, "lora"), v) for v in linked_loras]
+                text_labels = [line.strip() for line in row_values.strip().splitlines() if line.strip()]
+                if len(text_labels) == len(linked_loras):
+                    row_items = [(label, fname) for label, fname in zip(text_labels, linked_loras)]
+                else:
+                    row_items = [(derive_label(v, "lora"), v) for v in linked_loras]
             else:
                 row_items = _parse_axis_values(row_values, row_axis)
 
             if col_axis == "lora":
-                col_items = [(derive_label(v, "lora"), v) for v in linked_loras]
+                text_labels = [line.strip() for line in col_values.strip().splitlines() if line.strip()]
+                if len(text_labels) == len(linked_loras):
+                    col_items = [(label, fname) for label, fname in zip(text_labels, linked_loras)]
+                else:
+                    col_items = [(derive_label(v, "lora"), v) for v in linked_loras]
             else:
                 col_items = _parse_axis_values(col_values, col_axis)
         else:
